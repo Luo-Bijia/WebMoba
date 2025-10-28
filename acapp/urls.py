@@ -19,6 +19,6 @@ from django.urls import path, include
 """WebPage(acapp) urls"""
 
 urlpatterns = [
-    path('', include('game.urls')),   # 游戏部分的路由配置加载到主网站路由里
+    # path('', include('game.urls')),   # 游戏部分的路由配置加载到主网站路由里
     path('admin/', admin.site.urls)
 ]
