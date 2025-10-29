@@ -54,38 +54,3 @@ class AcGameMenu{
         this.$menu.hide();
     }
 }
-class AcGamePlayground{
-    constructor(root){
-        this.root = root;
-        this.$playground = $(`
-<div>
-游戏界面
-</div>
-            `);
-        this.hide();
-        this.root.$ac_game.append(this.$playground);
-        
-        this.start();
-    }
-    start(){
-    }
-    update(){
-    }
-    show(){         // 打开playground界面
-        this.$playground.show();
-    }
-    hide(){         // 关闭playground界面
-        this.$playground.hide();
-    }
-}
-class AcGame{
-    constructor(id){
-        this.id = id;
-        this.$ac_game = $('#' + id);        // 找到html里定义的主要对象(大div块)，取名为ac_game对象
-        this.menu = new AcGameMenu(this);
-        this.playground = new AcGamePlayground(this);
-        
-        this.start();
-    }
-    start(){}
-}
