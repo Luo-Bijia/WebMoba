@@ -28,6 +28,16 @@ DEBUG = True       # True - 方便后端调试，能在web显示报错信息
 
 ALLOWED_HOSTS = ["39.102.56.113", "app7624.acapp.acwing.com.cn"]
 
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': 'redis://127.0.0.1:6379/1',
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        },
+    },
+}
+USER_AGENTS_CACHE = 'default'
 
 # Application definition
 

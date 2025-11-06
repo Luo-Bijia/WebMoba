@@ -89,7 +89,8 @@ class Settings{
         this.$login_submit = this.$login.find(".ac-game-settings-submit button");
         this.$login_error_message = this.$login.find(".ac-game-settings-error-message");
         this.$login_register = this.$login.find(".ac-game-settings-option");
-        
+        this.$login_acwing = this.$login.find(".ac-game-settings-acwing img");
+
         this.$login.hide();
         
         this.$register = this.$settings.find(".ac-game-settings-register");
@@ -99,7 +100,7 @@ class Settings{
         this.$register_submit = this.$register.find(".ac-game-settings-submit button");
         this.$register_error_message = this.$register.find(".ac-game-settings-error-message");
         this.$register_login = this.$register.find(".ac-game-settings-option");
-        
+
         this.$register.hide();
         
         this.root.$ac_game.append(this.$settings);
@@ -126,6 +127,9 @@ class Settings{
         this.$login_submit.click(function(){
             outer.login_on_remote();
         });
+        this.$login_acwing.click(function() {
+            outer.acwing_login();
+        });
     }
 
     add_listening_events_register(){
@@ -135,6 +139,19 @@ class Settings{
         });
         this.$register_submit.click(function() {
             outer.register_on_remote();
+        });
+    }
+
+    acwing_login(){    // 一键登录
+        $.ajax({
+            url: "https://app7624.acapp.acwing.com.cn/settings/acwing/web/apply_code/",
+            type: "GET",
+            success: function(resp){    // resp实际上就是后端apply_code.py return的{'result', 'apply_code_url'}的JsonResponse
+                console.log(resp);
+                if(resp.result === "success"){
+                    window.location.replace(resp.apply_code_url);   // 跳转到y总写好的授权页面
+                }
+            }
         });
     }
 
