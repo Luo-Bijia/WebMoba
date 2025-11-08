@@ -22,7 +22,6 @@ class AcGamePlayground {
     }
 
     resize() {
-        console.log("resize playground");
         this.width = this.$playground.width();
         this.height = this.$playground.height();
         let unit = Math.min(this.width / 16, this.height / 9);
@@ -32,7 +31,8 @@ class AcGamePlayground {
         if (this.game_map) this.game_map.resize();
     }
 
-    show() {  // 打开playground界面
+    show(mode) {  // 打开playground界面
+        let outer = this;
         this.$playground.show();
         
         this.resize();
@@ -41,10 +41,19 @@ class AcGamePlayground {
         this.height = this.$playground.height();
         this.game_map = new GameMap(this);
         this.players = [];
-        this.players.push(new Player(this, this.width / 2 / this.scale, this.height / 2 / this.scale, this.height * 0.05 / this.scale, "white", this.height * 0.15 / this.scale, true));
+        this.players.push(new Player(this, this.width / 2 / this.scale, this.height / 2 / this.scale, this.height * 0.05 / this.scale, "white", this.height * 0.15 / this.scale, "me", this.root.settings.username, this.root.settings.photo));
+        
+        if(mode === "single mode") {    // 单人模式，需要加入5个机器人
+            for (let i = 0; i < 5; i ++ ) {
+                this.players.push(new Player(this, this.width / 2 / this.scale, this.height / 2 / this.scale, this.height * 0.05 / this.scale, this.get_random_color(), this.height * 0.15 / this.scale, "robot"));
+            }
+        } else if(mode === "multi mode") {
+            this.mps = new MultiPlayerSocket(this);     // 自playground起创建多人游戏的WebSocket连接
+            this.mps.uuid = this.players[0].uuid;    // 将每个主机玩家的uuid传给主机的连接mps（动态添加uuid成员变量），方便后续操作
 
-        for (let i = 0; i < 5; i ++ ) {
-            this.players.push(new Player(this, this.width / 2 / this.scale, this.height / 2 / this.scale, this.height * 0.05 / this.scale, this.get_random_color(), this.height * 0.15 / this.scale, false));
+            this.mps.ws.onopen = function () {    // WebSocket连接建立成功后的回调函数
+                outer.mps.send_create_player(outer.root.settings.username, outer.root.settings.photo);
+            };
         }
     }
 

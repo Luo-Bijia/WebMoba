@@ -5,7 +5,17 @@ class AcGameObject{     // 游戏上物体的基类
         AC_GAME_OBJECTS.push(this);
         this.has_called_start = false;
         this.timedelta = 0;
+        
+        this.uuid = this.create_uuid();
+    }
 
+    create_uuid(){      // 为场上的any对象生成一个随机的8位数uuid
+        let res = "";
+        for(let i = 0;i < 8;i ++){
+            let x = parseInt(Math.floor(Math.random() * 10));
+            res += x;
+        }
+        return res;
     }
 
     start(){        // 只会在第一帧执行
