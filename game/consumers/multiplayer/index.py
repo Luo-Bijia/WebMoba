@@ -3,7 +3,6 @@ from django.conf import settings
 from django.core.cache import cache
 import json
 
-
 ''' WebSocket consumer for multiplayer game functionality. '''
 ''' async表示异步函数, await表示等待异步函数执行完毕'''
 class MultiPlayer(AsyncWebsocketConsumer):      # 多人游戏的WebSocket处理服务器端
@@ -23,7 +22,6 @@ class MultiPlayer(AsyncWebsocketConsumer):      # 多人游戏的WebSocket处理
         
         if not cache.has_key(self.room_name):
             cache.set(self.room_name, [], 3600)     # 将(房间名, 玩家列表)存入redis，房间持续存在1小时
-
         
         # send：后端向前端发送消息，前端会在onmessage里处理
         # 时间线:
@@ -59,15 +57,68 @@ class MultiPlayer(AsyncWebsocketConsumer):      # 多人游戏的WebSocket处理
         await self.channel_layer.group_send(
             self.room_name,     # 组标识
             {
-                'type': 'group_create_player',      # 告诉Channels："请调用每个同组成员的group_create_player方法"
-                'event': 'create_player',
+                'type': 'group_event_handler',      # 告诉Channels："请调用每个同组成员的group_event_handler方法"
+                'event': "create_player",
                 'uuid': data['uuid'],
                 'username': data['username'],
                 'photo': data['photo']
             })
     
-    async def group_create_player(self, data):
+    async def group_event_handler(self, data):
         await self.send(text_data=json.dumps(data))
+
+    async def move_to(self, data):
+        await self.channel_layer.group_send(
+            self.room_name,
+            {
+                'type': "group_event_handler",
+                'event': "move_to",
+                'uuid': data['uuid'],
+                'tx': data['tx'],
+                'ty': data['ty']
+            }
+        )
+
+    async def shoot_fireball(self, data):
+        await self.channel_layer.group_send(
+            self.room_name,
+            {
+                'type': "group_event_handler",
+                'event': "shoot_fireball",
+                'uuid': data['uuid'],
+                'tx': data['tx'],
+                'ty': data['ty'],
+                'ball_uuid': data['ball_uuid']
+            }
+        )
+
+    async def attack(self, data):
+        await self.channel_layer.group_send(
+            self.room_name,
+            {
+                'type': "group_event_handler",
+                'event': "attack",
+                'uuid': data['uuid'],
+                'attackee_uuid': data['attackee_uuid'],
+                'x': data['x'],
+                'y': data['y'],
+                'angle': data['angle'],
+                'damage': data['damage'],
+                'ball_uuid': data['ball_uuid']
+            }
+        )
+
+    async def flash(self, data):
+        await self.channel_layer.group_send(
+            self.room_name,
+            {
+                'type': "group_event_handler",
+                'event': "flash",
+                'uuid': data['uuid'],
+                'tx': data['tx'],
+                'ty': data['ty']
+            }
+        )
 
     ''' ※接收到前端数据时调用 '''
     async def receive(self, text_data):     
@@ -75,3 +126,11 @@ class MultiPlayer(AsyncWebsocketConsumer):      # 多人游戏的WebSocket处理
         event = data['event']
         if event == "create_player":
             await self.create_player(data)
+        elif event == "move_to":
+            await self.move_to(data)
+        elif event == "shoot_fireball":
+            await self.shoot_fireball(data)
+        elif event == "attack":
+            await self.attack(data)
+        elif event == "flash":
+            await self.flash(data)
