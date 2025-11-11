@@ -120,6 +120,17 @@ class MultiPlayer(AsyncWebsocketConsumer):      # 多人游戏的WebSocket处理
             }
         )
 
+    async def message(self, data):
+        await self.channel_layer.group_send(
+            self.room_name,
+            {
+                'type': "group_event_handler",
+                'event': "message",
+                'uuid': data['uuid'],
+                'text': data['text']
+            }
+        )
+
     ''' ※接收到前端数据时调用 '''
     async def receive(self, text_data):     
         data = json.loads(text_data)       # 将被stingify的json字符串转换为字典
@@ -134,3 +145,5 @@ class MultiPlayer(AsyncWebsocketConsumer):      # 多人游戏的WebSocket处理
             await self.attack(data)
         elif event == "flash":
             await self.flash(data)
+        elif event == "message":
+            await self.message(data)

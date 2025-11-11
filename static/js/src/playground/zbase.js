@@ -1,6 +1,7 @@
 class AcGamePlayground {
     constructor(root) {
         this.root = root;
+        // playground对象里的 $playground html元素
         this.$playground = $(`<div class="ac-game-playground"></div>`);
 
         this.hide();
@@ -55,6 +56,8 @@ class AcGamePlayground {
         } 
         // 自playground起创建多人游戏的WebSocket连接，主机玩家的uuid跟其mps的uuid一致（动态添加uuid成员变量）
         else if(mode === "multi mode") {
+            this.chat_field = new ChatField(this);      // multi mode-only
+            
             this.mps = new MultiPlayerSocket(this);
             this.mps.uuid = this.players[0].uuid;
 

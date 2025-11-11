@@ -36,6 +36,9 @@ class MultiPlayerSocket{
             else if(event === "flash") {
                 outer.receive_flash(uuid, data.tx, data.ty);
             }
+            else if(event === "message"){
+                outer.receive_message(uuid, data.text);
+            }
         };
     }
 
@@ -98,6 +101,16 @@ class MultiPlayerSocket{
         }));
     }
 
+    // 同步各主机上的聊天消息动态
+    send_message(text){
+        let outer = this;
+        this.ws.send(JSON.stringify({
+            'event': "message",
+            'uuid': outer.uuid,
+            'text': text
+        }));
+    }
+
     // 实时多次调用该函数来渲染场上还未创建的所有玩家
     receive_create_player(uuid, username, photo){
         let player = new Player(
@@ -155,5 +168,10 @@ class MultiPlayerSocket{
         let player = this.get_player(uuid);
         if(player)
             player.flash(tx, ty);
+    }
+
+    receive_message(uuid, text){
+        let player = this.get_player(uuid);
+        this.playground.chat_field.add_message(player.username, text);
     }
 }
