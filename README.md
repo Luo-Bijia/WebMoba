@@ -38,3 +38,64 @@ WebMoba is a lightweight multiplayer online battle game that runs in the browser
 
 --------
 
+
+
+## 📁 Project Structure
+
+```
+WebMoba/
+├── acapp/                 # Django main application
+├── game/                  # Core game logic
+├── multiplayer/           # Multiplayer WebSocket handling
+├── match_system/          # Matchmaking service
+├── scripts/               # Deployment scripts
+├── static/               # Static resources
+└── templates/            # Frontend templates
+```
+
+### Complete Service Startup Process
+
+Here is the complete sequence to start all required services:
+
+1. **Start Nginx service**
+
+```bash
+sudo /etc/init.d/nginx start
+```
+
+*Nginx acts as a reverse proxy and serves static files*
+
+2. **Start Redis server**
+
+```bash
+sudo redis-server /etc/redis/redis.conf
+```
+
+*Redis is used for caching and as the channel layer for WebSocket connections*
+
+3. **Start uWSGI service**
+
+```bash
+cd ~/acapp
+uwsgi --ini scripts/uwsgi.ini
+```
+
+*uWSGI handles the standard Django WSGI requests*
+
+4. **Start Django Channels (Daphne)**
+
+```bash
+cd ~/acapp
+daphne -b 0.0.0.0 -p 5015 acapp.asgi:application
+```
+
+*Daphne handles WebSocket connections on port 5015*
+
+5. **Start Match System Server**
+
+```bash
+cd ~/acapp/match_system/src/match_server
+python main.py
+```
+
+*The matchmaking service runs separately on port 9090*
