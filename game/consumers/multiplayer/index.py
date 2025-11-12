@@ -135,6 +135,37 @@ class MultiPlayer(AsyncWebsocketConsumer):      # 多人游戏的WebSocket处理
         )
 
     async def attack(self, data):
+        '''每次玩家的攻击都有可能终止掉整场战斗, 因此对局结束的判断及之后的处理在attack进行'''
+
+        if not self.room_name:          # eliminate dangling bullet
+            return
+
+        players = cache.get(self.room_name)
+        if not players:         # eliminate dangling bullet
+            return
+
+        for player in players:
+            if player['uuid'] == data['attackee_uuid']:
+                player['hp'] -= 25
+
+        remain_cnt = 0
+        for player in players:
+            if player['hp'] > 0:
+                remain_cnt += 1
+        
+        if remain_cnt > 1 and self.room_name:
+            cache.set(self.room_name, players, 3600)        # 这次攻击未导致本场游戏结束，正常更新fighting状态下的players
+        else:
+            def db_update_player_score(username, incr_score):
+                player = Player.objects.get(user__username=username)
+                player.score += incr_score
+                player.save()
+            for player in players:
+                if player['hp'] <= 0:       # loser
+                    await database_sync_to_async(db_update_player_score)(player['username'], -5)
+                else:       # winner
+                    await database_sync_to_async(db_update_player_score)(player['username'], 10)
+
         await self.channel_layer.group_send(
             self.room_name,
             {

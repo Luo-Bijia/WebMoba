@@ -24,6 +24,12 @@ class AcGameObject{     // 游戏上物体的基类
     update(){       // 后面每一帧都会执行
     
     }
+
+    late_update(){      // 每一帧的最后执行一次
+
+
+    }
+
     on_destroy(){       // 被删除前保留现场
 
     }
@@ -52,6 +58,12 @@ let AC_GAME_ANIMATION_FRAME = function(timestamp){
             obj.update();
         }
     }
+
+    for(let i = 0;i <AC_GAME_OBJECTS.length;i ++){
+        let obj = AC_GAME_OBJECTS[i];
+        obj.late_update();
+    }
+
     last_timestamp = timestamp;
     
     requestAnimationFrame(AC_GAME_ANIMATION_FRAME);

@@ -126,6 +126,9 @@ class MultiPlayerSocket{
         );
         player.uuid = uuid;         // ※统一uuid，谁主机上创建的player，就用在那主机上的uuid
         this.playground.players.push(player);
+        
+        // console.log("receive_create_player: " + username);
+        // player.start();     // ✅ 手动调用 start()，否则 player_count 不会增加
     }
 
     get_player(uuid){
